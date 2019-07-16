@@ -91,9 +91,8 @@ class Geolocator {
       GeolocationPermission locationPermissionLevel =
           GeolocationPermission.location}) async {
     final PermissionStatus permission = await _getLocationPermission(locationPermissionLevel, ignoreLocationService);
-
-    final locationServerStatus = await PermissionHandler().checkServiceStatus(toPermissionGroup(locationPermissionLevel));
-    if (locationServerStatus != ServiceStatus.enabled) {
+    final bool locationServiceActive = await isLocationServiceEnabled();
+    if (!locationServiceActive) {
       return null;
     }
 
@@ -131,8 +130,8 @@ class Geolocator {
           GeolocationPermission.location}) async {
     final PermissionStatus permission = await _getLocationPermission(locationPermissionLevel, ignoreLocationService);
 
-    final locationServerStatus = await PermissionHandler().checkServiceStatus(toPermissionGroup(locationPermissionLevel));
-    if (locationServerStatus != ServiceStatus.enabled) {
+    final bool locationServiceActive = await isLocationServiceEnabled();
+    if (!locationServiceActive) {
       return null;
     }
 
