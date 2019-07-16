@@ -92,7 +92,6 @@ class Geolocator {
     final PermissionStatus permission = await _getLocationPermission(locationPermissionLevel);
 
     if (permission == PermissionStatus.granted) {
-      print("permissionGranted");
       final LocationOptions locationOptions = LocationOptions(
           accuracy: desiredAccuracy,
           distanceFilter: 0,
@@ -187,9 +186,8 @@ class Geolocator {
   Future<PermissionStatus> _getLocationPermission(GeolocationPermission permission) async {
     final PermissionGroup permissionGroup = toPermissionGroup(permission);
     final status = await PermissionHandler().checkPermissionStatus(permissionGroup, ignoreLocationService: true);
-    
     if (status != PermissionStatus.granted) {
-      Map<PermissionGroup, PermissionStatus> ret = await PermissionHandler().requestPermissions([permissionGroup]);
+      Map<PermissionGroup, PermissionStatus> ret = await PermissionHandler().requestPermissions([permissionGroup], ignoreLocationService: true);
       if (ret != null) {
         return ret[permissionGroup];
       }
