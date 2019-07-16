@@ -88,13 +88,13 @@ GeolocationStatus fromPermissionStatus(PermissionStatus status) {
   }
 }
 
-LocationPermissionLevel toPermissionLevel(GeolocationPermission permission) {
+PermissionGroup toPermissionGroup(GeolocationPermission permission) {
   switch (permission) {
     case GeolocationPermission.locationAlways:
-      return LocationPermissionLevel.locationAlways;
+      return PermissionGroup.locationAlways;
     case GeolocationPermission.locationWhenInUse:
-      return LocationPermissionLevel.locationWhenInUse;
+      return PermissionGroup.locationWhenInUse;
     default:
-      return LocationPermissionLevel.location;
+      return PermissionGroup.location;
   }
 }

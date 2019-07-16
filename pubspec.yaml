@@ -14,7 +14,9 @@ dependencies:
   meta: ^1.1.6
 
   google_api_availability: ^2.0.1
-  location_permissions: ^2.0.1
+  # location_permissions: ^2.0.1
+  permission_handler:
+    git: https://github.com/pettersnoopy/flutter-permission-handler.git
 
 dev_dependencies:
   flutter_test:

@@ -8,6 +8,7 @@ import 'package:google_api_availability/google_api_availability.dart';
 import 'package:meta/meta.dart';
 import 'package:location_permissions/location_permissions.dart';
 import 'package:vector_math/vector_math.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 part 'models/geolocation_enums.dart';
 
@@ -48,16 +49,14 @@ class Geolocator {
   Future<GeolocationStatus> checkGeolocationPermissionStatus(
       {GeolocationPermission locationPermission =
           GeolocationPermission.location}) async {
-    final PermissionStatus permissionStatus = await LocationPermissions()
-        .checkPermissionStatus(level: toPermissionLevel(locationPermission));
-
+    final PermissionStatus permissionStatus = await PermissionHandler().checkPermissionStatus(toPermissionGroup(locationPermission), ignoreLocationService: true);
     return fromPermissionStatus(permissionStatus);
   }
 
   /// Returns a [bool] value indicating whether location services are enabled on the device.
   Future<bool> isLocationServiceEnabled() async {
     final ServiceStatus serviceStatus =
-        await LocationPermissions().checkServiceStatus();
+        await PermissionHandler().checkServiceStatus(PermissionGroup.location);
 
     return serviceStatus == ServiceStatus.enabled ? true : false;
   }
@@ -90,10 +89,10 @@ class Geolocator {
       {LocationAccuracy desiredAccuracy = LocationAccuracy.best,
       GeolocationPermission locationPermissionLevel =
           GeolocationPermission.location}) async {
-    final PermissionStatus permission = await _getLocationPermission(
-        toPermissionLevel(locationPermissionLevel));
+    final PermissionStatus permission = await _getLocationPermission(locationPermissionLevel);
 
     if (permission == PermissionStatus.granted) {
+      print("permissionGranted");
       final LocationOptions locationOptions = LocationOptions(
           accuracy: desiredAccuracy,
           distanceFilter: 0,
@@ -124,8 +123,7 @@ class Geolocator {
       {LocationAccuracy desiredAccuracy = LocationAccuracy.best,
       GeolocationPermission locationPermissionLevel =
           GeolocationPermission.location}) async {
-    final PermissionStatus permission = await _getLocationPermission(
-        toPermissionLevel(locationPermissionLevel));
+    final PermissionStatus permission = await _getLocationPermission(locationPermissionLevel);
 
     if (permission == PermissionStatus.granted) {
       final LocationOptions locationOptions = LocationOptions(
@@ -172,8 +170,7 @@ class Geolocator {
       [LocationOptions locationOptions = const LocationOptions(),
       GeolocationPermission locationPermissionLevel =
           GeolocationPermission.location]) async* {
-    final PermissionStatus permission = await _getLocationPermission(
-        toPermissionLevel(locationPermissionLevel));
+    final PermissionStatus permission = await _getLocationPermission(locationPermissionLevel);
 
     if (permission == PermissionStatus.granted) {
       _onPositionChanged ??= _eventChannel
@@ -187,19 +184,18 @@ class Geolocator {
     }
   }
 
-  Future<PermissionStatus> _getLocationPermission(
-      LocationPermissionLevel locationPermissionLevel) async {
-    final PermissionStatus permission = await LocationPermissions()
-        .checkPermissionStatus(level: locationPermissionLevel);
-
-    if (permission != PermissionStatus.granted) {
-      final PermissionStatus permissionStatus = await LocationPermissions()
-          .requestPermissions(permissionLevel: locationPermissionLevel);
-
-      return permissionStatus;
-    } else {
-      return permission;
+  Future<PermissionStatus> _getLocationPermission(GeolocationPermission permission) async {
+    final PermissionGroup permissionGroup = toPermissionGroup(permission);
+    final status = await PermissionHandler().checkPermissionStatus(permissionGroup, ignoreLocationService: true);
+    
+    if (status != PermissionStatus.granted) {
+      Map<PermissionGroup, PermissionStatus> ret = await PermissionHandler().requestPermissions([permissionGroup]);
+      if (ret != null) {
+        return ret[permissionGroup];
+      }
     }
+
+    return status;
   }
 
   void _handleInvalidPermissions(PermissionStatus permission) {
