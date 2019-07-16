@@ -87,9 +87,10 @@ class Geolocator {
   /// When the [desiredAccuracy] is not supplied, it defaults to best.
   Future<Position> getCurrentPosition(
       {LocationAccuracy desiredAccuracy = LocationAccuracy.best,
+        bool ignoreLocationService = true,
       GeolocationPermission locationPermissionLevel =
           GeolocationPermission.location}) async {
-    final PermissionStatus permission = await _getLocationPermission(locationPermissionLevel);
+    final PermissionStatus permission = await _getLocationPermission(locationPermissionLevel, ignoreLocationService);
 
     if (permission == PermissionStatus.granted) {
       final LocationOptions locationOptions = LocationOptions(
@@ -183,11 +184,11 @@ class Geolocator {
     }
   }
 
-  Future<PermissionStatus> _getLocationPermission(GeolocationPermission permission) async {
+  Future<PermissionStatus> _getLocationPermission(GeolocationPermission permission, bool ignoreLocationService) async {
     final PermissionGroup permissionGroup = toPermissionGroup(permission);
-    final status = await PermissionHandler().checkPermissionStatus(permissionGroup, ignoreLocationService: true);
+    final status = await PermissionHandler().checkPermissionStatus(permissionGroup, ignoreLocationService: ignoreLocationService);
     if (status != PermissionStatus.granted) {
-      Map<PermissionGroup, PermissionStatus> ret = await PermissionHandler().requestPermissions([permissionGroup], ignoreLocationService: true);
+      Map<PermissionGroup, PermissionStatus> ret = await PermissionHandler().requestPermissions([permissionGroup], ignoreLocationService: ignoreLocationService);
       if (ret != null) {
         return ret[permissionGroup];
       }
