@@ -6,7 +6,6 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 import 'package:google_api_availability/google_api_availability.dart';
 import 'package:meta/meta.dart';
-import 'package:location_permissions/location_permissions.dart';
 import 'package:vector_math/vector_math.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -49,7 +48,9 @@ class Geolocator {
   Future<GeolocationStatus> checkGeolocationPermissionStatus(
       {GeolocationPermission locationPermission =
           GeolocationPermission.location}) async {
-    final PermissionStatus permissionStatus = await PermissionHandler().checkPermissionStatus(toPermissionGroup(locationPermission), ignoreLocationService: true);
+    final PermissionStatus permissionStatus = await PermissionHandler()
+        .checkPermissionStatus(toPermissionGroup(locationPermission),
+            ignoreLocationService: true);
     return fromPermissionStatus(permissionStatus);
   }
 
@@ -87,10 +88,11 @@ class Geolocator {
   /// When the [desiredAccuracy] is not supplied, it defaults to best.
   Future<Position> getCurrentPosition(
       {LocationAccuracy desiredAccuracy = LocationAccuracy.best,
-        bool ignoreLocationService = true,
+      bool ignoreLocationService = true,
       GeolocationPermission locationPermissionLevel =
           GeolocationPermission.location}) async {
-    final PermissionStatus permission = await _getLocationPermission(locationPermissionLevel, ignoreLocationService);
+    final PermissionStatus permission = await _getLocationPermission(
+        locationPermissionLevel, ignoreLocationService);
     final bool locationServiceActive = await isLocationServiceEnabled();
     if (!locationServiceActive) {
       return null;
@@ -125,10 +127,11 @@ class Geolocator {
   /// When no position is available, null is returned.
   Future<Position> getLastKnownPosition(
       {LocationAccuracy desiredAccuracy = LocationAccuracy.best,
-        bool ignoreLocationService = true,
+      bool ignoreLocationService = true,
       GeolocationPermission locationPermissionLevel =
           GeolocationPermission.location}) async {
-    final PermissionStatus permission = await _getLocationPermission(locationPermissionLevel, ignoreLocationService);
+    final PermissionStatus permission = await _getLocationPermission(
+        locationPermissionLevel, ignoreLocationService);
 
     final bool locationServiceActive = await isLocationServiceEnabled();
     if (!locationServiceActive) {
@@ -181,7 +184,8 @@ class Geolocator {
       bool ignoreLocationService = true,
       GeolocationPermission locationPermissionLevel =
           GeolocationPermission.location]) async* {
-    final PermissionStatus permission = await _getLocationPermission(locationPermissionLevel, ignoreLocationService);
+    final PermissionStatus permission = await _getLocationPermission(
+        locationPermissionLevel, ignoreLocationService);
 
     if (permission == PermissionStatus.granted) {
       _onPositionChanged ??= _eventChannel
@@ -195,11 +199,16 @@ class Geolocator {
     }
   }
 
-  Future<PermissionStatus> _getLocationPermission(GeolocationPermission permission, bool ignoreLocationService) async {
+  Future<PermissionStatus> _getLocationPermission(
+      GeolocationPermission permission, bool ignoreLocationService) async {
     final PermissionGroup permissionGroup = toPermissionGroup(permission);
-    final status = await PermissionHandler().checkPermissionStatus(permissionGroup, ignoreLocationService: ignoreLocationService);
+    final status = await PermissionHandler().checkPermissionStatus(
+        permissionGroup,
+        ignoreLocationService: ignoreLocationService);
     if (status != PermissionStatus.granted) {
-      Map<PermissionGroup, PermissionStatus> ret = await PermissionHandler().requestPermissions([permissionGroup], ignoreLocationService: ignoreLocationService);
+      Map<PermissionGroup, PermissionStatus> ret = await PermissionHandler()
+          .requestPermissions([permissionGroup],
+              ignoreLocationService: ignoreLocationService);
       if (ret != null) {
         return ret[permissionGroup];
       }
@@ -288,7 +297,6 @@ class Geolocator {
   /// The initial bearing will most of the time be different than the end bearing, see [https://www.movable-type.co.uk/scripts/latlong.html#bearing]
   Future<double> bearingBetween(double startLatitude, double startLongitude,
       double endLatitude, double endLongitude) {
-
     var startLongtitudeRadians = radians(startLongitude);
     var startLatitudeRadians = radians(startLatitude);
 
